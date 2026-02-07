@@ -10,206 +10,245 @@ from visualizer import (
 )
 
 # --- PAGE CONFIGURATION ---
-st.set_page_config(layout="wide", page_title="LOGISTICS COMMAND", initial_sidebar_state="expanded")
+st.set_page_config(layout="wide", page_title="BRAZIL STRATEGIC TRADE CENTER", initial_sidebar_state="expanded")
 
-# --- SVG ICONS (VECTOR ART) ---
-ICON_SHIP = """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M2 21h20M4 17l2-9h12l2 9M12 17v4M8 17v4M16 17v4M12 8V3m0 0l-3 3m3-3l3 3"/></svg>"""
-ICON_ALERT = """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>"""
-ICON_CHECK = """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>"""
-ICON_RADAR = """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 12 2.3 9.4"/></svg>"""
-
-# --- CSS OVERHAUL (TEXTURES & SMALLER FONTS) ---
+# --- CLEAN CSS ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
 
-    /* 1. TEXTURE OVERLAYS */
-    .stApp {
-        background-color: #020617;
-        /* Dot Matrix Pattern */
-        background-image: radial-gradient(#1e293b 1px, transparent 1px);
-        background-size: 20px 20px;
-    }
+    /* 1. DARK THEME */
+    .stApp { background-color: #0f172a; }
 
-    /* Scanline effect on containers */
+    /* 2. CARDS */
     div[data-testid="stMetric"], div.stTabs, div[data-testid="stDataFrame"] {
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-        background-size: 100% 2px, 3px 100%;
+        background-color: #1e293b;
         border: 1px solid #334155;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        border-radius: 4px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
-    /* 2. TYPOGRAPHY SCALING (FIX BIG TEXT) */
+    /* 3. TYPOGRAPHY */
     html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
+    div[data-testid="stMetricValue"] { font-family: 'JetBrains Mono', monospace !important; font-size: 1.6rem !important; color: #f8fafc !important; }
+    div[data-testid="stMetricLabel"] { font-size: 0.8rem !important; text-transform: uppercase; color: #94a3b8 !important; }
 
-    /* Force smaller metric numbers */
-    div[data-testid="stMetricValue"] {
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 1.8rem !important; /* Reduced from default */
-        color: #f8fafc !important;
-        text-shadow: 0 0 5px rgba(255,255,255,0.1);
-    }
+    /* 4. SIDEBAR */
+    section[data-testid="stSidebar"] { background-color: #020617 !important; border-right: 1px solid #1e293b; }
 
-    div[data-testid="stMetricLabel"] {
-        font-size: 0.75rem !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #94a3b8 !important;
-    }
-
-    /* 3. COMPONENT STYLING */
-    section[data-testid="stSidebar"] {
-        background-color: #0B1120 !important;
-        border-right: 1px solid #1e293b;
-    }
-
-    /* Custom Alert Boxes (Vector Styled) */
-    .tech-alert {
-        padding: 12px; margin-bottom: 15px;
-        border: 1px solid; border-left-width: 4px;
-        background: rgba(0,0,0,0.3);
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.9rem;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .alert-red { border-color: #ef4444; color: #fca5a5; box-shadow: 0 0 10px rgba(239,68,68,0.1); }
-    .alert-amber { border-color: #f59e0b; color: #fcd34d; box-shadow: 0 0 10px rgba(245,158,11,0.1); }
-    .alert-blue { border-color: #3b82f6; color: #93c5fd; box-shadow: 0 0 10px rgba(59,130,246,0.1); }
-
-    /* Tactical Brief Box */
-    .tactical-brief {
-        margin-top: -10px; margin-bottom: 20px;
-        padding: 10px;
-        border-top: 1px dashed #334155;
-        background: rgba(15, 23, 42, 0.5);
-        color: #64748b;
-        font-size: 0.8rem;
-        font-family: 'JetBrains Mono', monospace;
-    }
+    /* 5. ALERT BOXES */
+    .status-box { padding: 15px; margin-bottom: 20px; border-left: 5px solid; background-color: #1e293b; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+    .status-normal { border-color: #10b981; }
+    .status-danger { border-color: #ef4444; }
+    .status-warn { border-color: #f59e0b; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- SIDEBAR CONTROLS ---
-st.sidebar.markdown(f"### {ICON_SHIP} CONTROL DECK", unsafe_allow_html=True)
+st.sidebar.markdown("### SYSTEM CONTROLS")
 st.sidebar.markdown("---")
 
 scenario = st.sidebar.radio(
-    "SIMULATION PROTOCOL",
-    ["BUSINESS AS USUAL", "RED SEA BLOCKADE", "PANAMA DROUGHT", "SANTOS STRIKE"],
+    "SIMULATION SCENARIO",
+    [
+        "BUSINESS AS USUAL",
+        "THE GREAT CANAL COLLAPSE",  # Suez + Panama
+        "ATLANTIC BLOCKADE (GIBRALTAR)",  # Forces Europe traffic South
+        "TOTAL PORT BLACKOUT"  # Santos + Tubarao
+    ],
     index=0
 )
 
-# LOGIC ENGINE
+# --- LOGIC ENGINE ---
+baseline_restrictions = ['northwest', 'northeast', 'bering']
+baseline_origins = ORIGINS.copy()
+
 active_restrictions = ['northwest', 'northeast', 'bering']
 active_origins = ORIGINS.copy()
-alert_html = f'<div class="tech-alert alert-blue">{ICON_CHECK} SYSTEM NORMAL // OPTIMAL FLOW</div>'
 
-if scenario == "RED SEA BLOCKADE":
-    active_restrictions += ['suez', 'babalmandab']
-    alert_html = f'<div class="tech-alert alert-red">{ICON_ALERT} CRITICAL: SUEZ BLOCKED // REROUTING</div>'
-elif scenario == "PANAMA DROUGHT":
-    active_restrictions += ['panama']
-    alert_html = f'<div class="tech-alert alert-amber">{ICON_RADAR} WARNING: PANAMA CAPACITY LOW</div>'
-elif scenario == "SANTOS STRIKE":
-    if "Santos Port (São Paulo)" in active_origins:
-        del active_origins["Santos Port (São Paulo)"]
-    alert_html = f'<div class="tech-alert alert-red">{ICON_ALERT} HAZARD: SANTOS PORT OFFLINE</div>'
+alert_html = '<div class="status-box status-normal">SYSTEM NORMAL: OPTIMAL ROUTING</div>'
 
-# STATUS MONITOR
-st.sidebar.markdown("---")
-st.sidebar.caption("📡 **TELEMETRY**")
-st.sidebar.code(f"MODE: {scenario}\nPORTS: {len(active_origins)} ONLINE\nRESTRICTIONS: {len(active_restrictions)}")
+if scenario == "THE GREAT CANAL COLLAPSE":
+    active_restrictions += ['suez', 'panama', 'babelmandeb']
+    alert_html = '<div class="status-box status-danger">GLOBAL CRISIS: SUEZ & PANAMA CLOSED. ROUTES FORCED AROUND CAPES.</div>'
+
+elif scenario == "ATLANTIC BLOCKADE (GIBRALTAR)":
+    active_restrictions += ['gibraltar']
+    alert_html = '<div class="status-box status-warn">EUROPEAN CRISIS: GIBRALTAR STRAIT CLOSED. NORTHERN ROUTES DIVERTED.</div>'
+
+elif scenario == "TOTAL PORT BLACKOUT":
+    if "Santos Port (São Paulo)" in active_origins: del active_origins["Santos Port (São Paulo)"]
+    if "Tubarão Port (Vitoria)" in active_origins: del active_origins["Tubarão Port (Vitoria)"]
+    alert_html = '<div class="status-box status-danger">CATASTROPHIC FAILURE: SANTOS & TUBARÃO OFFLINE. EXPORT CAPACITY CRITICAL.</div>'
 
 st.sidebar.markdown("---")
 product_options = ["All Commodities"] + PRODUCTS
-selected_product_view = st.sidebar.selectbox("CARGO MANIFEST", options=product_options)
+selected_product_view = st.sidebar.selectbox("PRODUCT FILTER", options=product_options)
 
 # --- MAIN PAGE ---
-st.title(f"COMMAND CENTER // {selected_product_view.upper()}")
+st.title("BRAZIL LOGISTICS IMPACT CENTER")
 st.markdown(alert_html, unsafe_allow_html=True)
 
-# --- CALCULATION ---
-combined_route_results = []
-combined_emission_data = []
-total_system_co2 = 0
-total_system_kg = 0
+# --- IMPACT CALCULATION ---
+with st.spinner("CALCULATING STRATEGIC IMPACT..."):
+    products_to_process = PRODUCTS if selected_product_view == "All Commodities" else [selected_product_view]
 
-products_to_process = PRODUCTS if selected_product_view == "All Commodities" else [selected_product_view]
+    current_routes = []
+    current_emissions = []
+    curr_co2 = 0
+    curr_kg = 0
 
-for prod in products_to_process:
-    r_results = calculate_routes_for_product(prod, active_restrictions, active_origins)
-    e_data, _, p_co2, p_kg = calculate_total_emissions(r_results, prod)
+    # Baseline vars
+    base_co2 = 0
+    base_kg = 0
 
-    if selected_product_view == "All Commodities":
-        for r in r_results: r['product_group'] = prod
-        for e in e_data: e['product_group'] = prod
+    for prod in products_to_process:
+        # Run Current Scenario
+        r_curr = calculate_routes_for_product(prod, active_restrictions, active_origins)
+        e_curr, _, c_co2, c_kg = calculate_total_emissions(r_curr, prod)
 
-    combined_route_results.extend(r_results)
-    combined_emission_data.extend(e_data)
-    total_system_co2 += p_co2
-    total_system_kg += p_kg
+        # Run Baseline (Normal) Scenario
+        r_base = calculate_routes_for_product(prod, baseline_restrictions, baseline_origins)
+        _, _, b_co2, b_kg = calculate_total_emissions(r_base, prod)
 
-avg_system_efficiency = (total_system_co2 / total_system_kg) if total_system_kg > 0 else 0
+        if selected_product_view == "All Commodities":
+            for r in r_curr: r['product_group'] = prod
+            for e in e_curr: e['product_group'] = prod
 
-# --- METRICS ---
+        current_routes.extend(r_curr)
+        current_emissions.extend(e_curr)
+        curr_co2 += c_co2
+        curr_kg += c_kg
+        base_co2 += b_co2
+        base_kg += b_kg
+
+    # --- INTELLIGENT DELTA CALCULATION ---
+    # 1. Efficiency Delta (Positive is BAD)
+    curr_efficiency = (curr_co2 / curr_kg) if curr_kg > 0 else 0
+    base_efficiency = (base_co2 / base_kg) if base_kg > 0 else 0
+    eff_diff = curr_efficiency - base_efficiency
+    eff_percent = (eff_diff / base_efficiency * 100) if base_efficiency > 0 else 0
+
+    # 2. Volume Delta (Negative is BAD)
+    vol_diff = curr_kg - base_kg
+    vol_percent = (vol_diff / base_kg * 100) if base_kg > 0 else 0
+
+    # 3. CO2 Total Delta
+    co2_diff = curr_co2 - base_co2
+    co2_percent = (co2_diff / base_co2 * 100) if base_co2 > 0 else 0
+
+# --- METRICS ROW ---
 col1, col2, col3, col4 = st.columns(4)
-with col1: st.metric("NET CO2 IMPACT", f"{total_system_co2 / 1_000_000:,.1f} M t")
-with col2: st.metric("EFFICIENCY", f"{avg_system_efficiency:.4f} kg/kg")
+
+with col1:
+    st.metric(
+        "TOTAL CO2 EMISSIONS",
+        f"{curr_co2 / 1_000_000:,.1f} M t",
+        f"{co2_percent:+.1f}% Impact",
+        delta_color="inverse"
+    )
+
+with col2:
+    st.metric(
+        "TRADE VOLUME",
+        f"{curr_kg / 1_000_000_000:,.1f} B kg",
+        f"{vol_percent:+.1f}% Volume" if abs(vol_percent) > 0.1 else "Stable",
+        delta_color="normal"
+    )
+
 with col3:
-    active_routes = len([r for r in combined_route_results if r.get('volume_kg', 0) > 0])
-    st.metric("ACTIVE VECTORS", f"{active_routes}")
+    st.metric(
+        "ACTIVE VECTORS",
+        f"{len([r for r in current_routes if r.get('volume_kg', 0) > 0])}",
+        delta="\xa0",  # Use a non-breaking space character
+        delta_color="off"
+    )
+
 with col4:
-    total_vol_b = total_system_kg / 1_000_000_000
-    st.metric("TOTAL MASS", f"{total_vol_b:,.1f} B kg")
+    st.metric(
+        "LOGISTICS EFFICIENCY",
+        f"{curr_efficiency:.4f} kg/kg",
+        f"{eff_percent:+.1f}% Intensity" if abs(eff_percent) > 0.1 else "Stable",
+        delta_color="inverse"
+    )
 
 # --- MAP ---
-st.markdown("### 🗺️ GEOSPATIAL NETWORK")
-fig_map = create_route_map(combined_route_results, "Dark", False, True)
+st.markdown("### 🗺️ GLOBAL NETWORK MAP")
+fig_map = create_route_map(current_routes, "Dark", False, False)
 st.plotly_chart(fig_map, use_container_width=True, key=f"map_{scenario}")
-st.markdown("""
-<div class="tactical-brief">
-    <strong>>> TACTICAL BRIEF:</strong> VISUALIZING REAL-TIME SUPPLY VECTORS. 
-    LINES REPRESENT ACTIVE MARITIME ROUTES. 
-    COLORS INDICATE COMMODITY TYPE. 
-    THICKNESS INDICATES RELATIVE VOLUME.
-</div>
-""", unsafe_allow_html=True)
 
-# --- INTEL SECTION ---
-st.markdown("### STRATEGIC INTELLIGENCE")
+# app.py
+from config import EMISSIONS_DATA_SOURCE, SOURCE_NAME
+from visualizer import create_emissions_factor_chart
+
+# ...  ...
+
+st.markdown("---")
+st.markdown("### 📏 METHODOLOGY & DATA SOURCES")
+
+col_method_1, col_method_2 = st.columns([2, 1])
+
+with col_method_1:
+    st.markdown("#### CARBON INTENSITY FACTORS")
+    st.caption("Comparison of CO₂ emissions per ton-km based on vessel type used for each commodity.")
+
+    # CALL THE NEW VISUALIZER FUNCTION
+    fig_factors = create_emissions_factor_chart()
+    st.plotly_chart(fig_factors, use_container_width=True)
+
+with col_method_2:
+    st.info("ℹ️ **SOURCE DATA**")
+    st.markdown(f"""
+    **Standard:** {SOURCE_NAME}
+
+    **Link:** [Access Official Data 2024]({EMISSIONS_DATA_SOURCE})
+
+    **Calculation:**
+    Emissions = Distance (km) × Weight (tons) × Factor
+
+    *Note: Factors are specific to the vessel class typically used for these commodities (e.g., Capesize for Ore vs. Reefer for Beef).*
+    """)
+# --- ANALYTICS ---
+st.markdown("### 📊 STRATEGIC ANALYSIS")
 col_left, col_right = st.columns(2)
-valid_chart_data = [d for d in combined_emission_data if d.get('Export Volume (kg)', 0) > 0]
+valid_data = [d for d in current_emissions if d.get('Export Volume (kg)', 0) > 0]
 
 with col_left:
-    tab_flow, tab_matrix = st.tabs(["🌊 FLOW", "🔥 HEATMAP"])
-
+    tab_flow, tab_matrix = st.tabs(["TRADE FLOW", "CARBON MATRIX"])
     with tab_flow:
-        fig_sankey = create_sankey_diagram(valid_chart_data)
+        fig_sankey = create_sankey_diagram(valid_data)
         st.plotly_chart(fig_sankey, use_container_width=True)
-        st.markdown(
-            """<div class="tactical-brief">>> ANALYSIS: SANKEY DIAGRAM SHOWS MASS TRANSFER FROM ORIGIN HUBS TO DESTINATION MARKETS. WIDTH = VOLUME.</div>""",
-            unsafe_allow_html=True)
-
     with tab_matrix:
-        fig_heat = create_heatmap(valid_chart_data)
+        fig_heat = create_heatmap(valid_data)
         st.plotly_chart(fig_heat, use_container_width=True)
-        st.markdown(
-            """<div class="tactical-brief">>> ANALYSIS: RED ZONES INDICATE HIGH CARBON INTENSITY (CO2 PER TON). TARGET THESE ROUTES FOR OPTIMIZATION.</div>""",
-            unsafe_allow_html=True)
 
 with col_right:
-    tab_radar, tab_data = st.tabs(["📡 RADAR", "📋 DATA"])
-
+    tab_radar, tab_data = st.tabs(["RISK RADAR", "RAW DATA"])
     with tab_radar:
-        fig_radar = create_bubble_radar(valid_chart_data)
+        fig_radar = create_bubble_radar(valid_data)
         st.plotly_chart(fig_radar, use_container_width=True)
-        st.markdown(
-            """<div class="tactical-brief">>> ANALYSIS: SCATTER PLOT IDENTIFIES EFFICIENCY OUTLIERS. TOP-LEFT QUADRANT = HIGH RISK (SHORT DISTANCE BUT HIGH EMISSION).</div>""",
-            unsafe_allow_html=True)
-
     with tab_data:
-        df_disp = pd.DataFrame(valid_chart_data)[
+        df_disp = pd.DataFrame(valid_data)[
             ['Destination', 'Distance (NM)', 'Export Volume (tons)', 'CO₂ Emissions (tons)']]
         st.dataframe(df_disp, use_container_width=True, height=350)
-        st.markdown("""<div class="tactical-brief">>> RAW DATA MANIFEST FOR EXPORT/AUDIT.</div>""",
-                    unsafe_allow_html=True)
+
+
+# --- CLEAN CSS ---
+st.markdown("""
+<style>
+    /* ... existing fonts ... */
+
+    /* 2. CARDS */
+    div[data-testid="stMetric"], div.stTabs, div[data-testid="stDataFrame"] {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 4px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        min-height: 170px;  /* <--- ADD THIS LINE TO FORCE UNIFORM HEIGHT */
+    }
+
+    /* ... rest of css ... */
+</style>
+""", unsafe_allow_html=True)
